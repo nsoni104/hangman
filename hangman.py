@@ -1,6 +1,14 @@
 import random
+import requests
+#import urllib.request, json
 
-word_list = ["hello", "world", "newspaper", "muffin", "apple", "mango", "pear", "tea", "coffee", "mug", "chair", "table", "water"]
+#with urllib.request.urlopen('http://www.randomlists.com/data/words.json') as url:
+#   word_list = json.loads(url.read().decode())
+word_url = requests.get('http://www.randomlists.com/data/words.json')
+word_dict = word_url.json()
+word_list = word_dict['data']
+
+#word_list = ["hello", "world", "newspaper", "muffin", "apple", "mango", "pear", "tea", "coffee", "mug", "chair", "table", "water"]
 
 def start_game ():
     print("Welcome to Hangman! We hope you're ready to enjoy a tough game")
@@ -59,7 +67,6 @@ def track_word(word,user_word,letter):
     return user_word
 
 
-
 def gameplay():
     word,max_guess = start_game()
     word_length = len(word)
@@ -71,21 +78,26 @@ def gameplay():
     while solved == False:
         if guesses > max_guess:
             print("Sorry you lose! The hangman hung your man.")
+            print("The word you were looking for was {0}.".format(word))
             return
         letter = enter_letter()
         if letter_in_word(word,letter) and letter not in letters_guessed:
             guesses += 1
+            letters_guessed.append(letter)
             print("Correct!")
             track_word(word, user_word, letter)
             print(list_to_string(user_word))
             print("You've now had {0} guesses.".format(guesses))
             if list_to_string(user_word) == word:
                 solved = True
+        elif letter in letters_guessed:
+            print ("You already guessed {0}! Enter a letter you haven't guessed already!".format(letter))
         else:
             guesses += 1
             letters_guessed.append(letter)
             print("Sorry, the word doesn't contain {0}.".format(letter))
             print("You've now had {0} guesses.".format(guesses))
+            print("Here's what you have so far: {0}".format(list_to_string(user_word)))
     print ("Congratulations! You win Hangman! It took you {0} guesses.".format(guesses))
     return
 
